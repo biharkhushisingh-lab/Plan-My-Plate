@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>🍽 Plan My Plate</title>
+
+  <!-- Google Fonts: Playfair Display (headings) + Nunito (body text) -->
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet"/>
+
+  <!-- 🎨 Link to our CSS file (all the design/styling lives there) -->
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<!-- =====================================================
+     HEADER — Logo + App Name
+     ===================================================== -->
+<header>
+  <div style="display:flex; align-items:center; justify-content:center; gap:14px; flex-wrap:wrap;">
+
+    <!-- SVG Logo: plate + fork + knife drawn in code (no image file needed!) -->
+    <svg width="72" height="72" viewBox="0 0 72 72" xmlns="http://www.w3.org/2000/svg">
+
+      <!-- Plate shadow (soft ellipse behind plate) -->
+      <ellipse cx="36" cy="58" rx="22" ry="4" fill="#d4c4b0" opacity="0.5"/>
+
+      <!-- Plate outer ring -->
+      <circle cx="36" cy="38" r="22" fill="white" stroke="#ede0d0" stroke-width="1.5"/>
+      <!-- Plate inner ring -->
+      <circle cx="36" cy="38" r="17" fill="#fdf6ee" stroke="#ede0d0" stroke-width="1"/>
+      <!-- Plate center (food area) -->
+      <circle cx="36" cy="38" r="10" fill="#fde8d8"/>
+      <!-- Tiny food dots on plate -->
+      <circle cx="33" cy="36" r="3"   fill="#e07b39"/>
+      <circle cx="39" cy="37" r="2.2" fill="#4a9e7a"/>
+      <circle cx="35" cy="41" r="2"   fill="#c96b2a"/>
+
+      <!-- Fork (left side) — green handle, dark tines -->
+      <g transform="translate(9, 10)">
+        <rect x="3"   y="22" width="5"   height="26" rx="2.5" fill="#4a9e7a"/>
+        <rect x="4.5" y="13" width="2"   height="11" fill="#4a9e7a"/>
+        <rect x="1.5" y="3"  width="1.8" height="12" rx="1" fill="#3b2f2f"/>
+        <rect x="4.5" y="3"  width="1.8" height="12" rx="1" fill="#3b2f2f"/>
+        <rect x="7.5" y="3"  width="1.8" height="12" rx="1" fill="#3b2f2f"/>
+      </g>
+
+      <!-- Knife (right side) — orange handle, grey blade -->
+      <g transform="translate(53, 10)">
+        <rect x="2" y="22" width="5" height="26" rx="2.5" fill="#e07b39"/>
+        <path d="M2,22 L7,22 L7,6 Q7,3 4.5,3 Q2,3 2,6 Z" fill="#b0bec5"/>
+        <line x1="6" y1="6" x2="6" y2="20" stroke="white" stroke-width="1" opacity="0.6"/>
+      </g>
+
+    </svg>
+    <!-- End SVG Logo -->
+
+    <div>
+      <h1 style="font-family:'Playfair Display',serif; font-size:2.8rem; color:var(--accent); line-height:1;">Plan My Plate</h1>
+      <p style="color:var(--muted); font-size:1rem; margin-top:6px;">Plan meals, save recipes & build your shopping list</p>
+    </div>
+  </div>
+</header>
+
+
+<!-- =====================================================
+     TABS — 3 navigation buttons
+     Clicking each button calls showTab() in script.js
+     ===================================================== -->
+<div class="tabs">
+  <button class="tab-btn active" onclick="showTab('recipes')">📖 Recipes</button>
+  <button class="tab-btn" onclick="showTab('planner')">📅 Week Planner</button>
+  <button class="tab-btn" onclick="showTab('shopping')">🛒 Shopping List</button>
+</div>
+
+
+<!-- =====================================================
+     TAB 1: RECIPES
+     ===================================================== -->
+<div id="recipes" class="section active">
+
+  <!-- Add Recipe Form -->
+  <div class="recipe-form">
+    <h2>✏️ Add a Recipe</h2>
+
+    <label>Recipe Name</label>
+    <input type="text" id="rName" placeholder="e.g. Mango Chicken Curry" />
+
+    <label>Category</label>
+    <select id="rCategory">
+      <option>🍳 Breakfast</option>
+      <option>🥗 Lunch</option>
+      <option>🍛 Dinner</option>
+      <option>🍰 Dessert</option>
+      <option>🥤 Snack</option>
+    </select>
+
+    <label>Type</label>
+    <select id="rType">
+      <option value="nonveg">🍗 Non-Veg</option>
+      <option value="veg">🥦 Veg</option>
+    </select>
+
+    <label>Ingredients (one per line)</label>
+    <textarea id="rIngredients" placeholder="2 chicken breasts&#10;1 cup coconut milk&#10;1 tsp turmeric..."></textarea>
+
+    <label>Instructions</label>
+    <textarea id="rInstructions" placeholder="1. Marinate the chicken...&#10;2. Heat oil in a pan..."></textarea>
+
+    <label>⏱ Time (e.g. 30 mins)</label>
+    <input type="text" id="rTime" placeholder="30 mins" />
+
+    <!-- Calls addRecipe() function in script.js -->
+    <button class="btn btn-primary" onclick="addRecipe()">🍽 Save Recipe</button>
+  </div>
+
+  <!-- Search Box + Cuisine Filter Buttons -->
+  <div style="max-width:900px; margin:0 auto 20px;">
+    <!-- oninput means: run renderRecipes() every time user types -->
+    <input type="text" id="searchBox" placeholder="🔍 Search recipes by name or ingredient..." oninput="renderRecipes()" style="margin-bottom:10px;"/>
+
+    <div style="display:flex; gap:8px; flex-wrap:wrap; justify-content:center;">
+      <!-- Each button calls setFilter() with the cuisine name -->
+      <button class="filter-btn active" onclick="setFilter('all', this)">🌍 All</button>
+      <button class="filter-btn" onclick="setFilter('Indian', this)">🇮🇳 Indian</button>
+      <button class="filter-btn" onclick="setFilter('Italian', this)">🇮🇹 Italian</button>
+      <button class="filter-btn" onclick="setFilter('Chinese', this)">🇨🇳 Chinese</button>
+      <button class="filter-btn" onclick="setFilter('Mexican', this)">🇲🇽 Mexican</button>
+      <button class="filter-btn" onclick="setFilter('American', this)">🇺🇸 American</button>
+      <button class="filter-btn" onclick="setFilter('Japanese', this)">🇯🇵 Japanese</button>
+      <button class="filter-btn" onclick="setFilter('Thai', this)">🇹🇭 Thai</button>
+      <button class="filter-btn" onclick="setFilter('Middle Eastern', this)">🧆 M.Eastern</button>
+      <button class="filter-btn" onclick="setFilter('My Recipes', this)">⭐ My Recipes</button>
+    </div>
+  </div>
+
+  <!-- Recipe Cards are injected here by renderRecipes() in script.js -->
+  <div class="recipe-grid" id="recipeGrid"></div>
+
+</div>
+<!-- End Recipes Tab -->
+
+
+<!-- =====================================================
+     TAB 2: WEEK PLANNER
+     The 7-day grid is built by buildPlanner() in script.js
+     ===================================================== -->
+<div id="planner" class="section">
+  <div style="text-align:center; margin-bottom:20px;">
+    <p style="color:var(--muted); font-size:0.9rem;">Assign your saved recipes to each day & meal 🗓</p>
+  </div>
+  <!-- Grid columns (Mon–Sun) injected here by buildPlanner() -->
+  <div class="planner-grid" id="plannerGrid"></div>
+</div>
+<!-- End Planner Tab -->
+
+
+<!-- =====================================================
+     TAB 3: SHOPPING LIST
+     ===================================================== -->
+<div id="shopping" class="section">
+  <div class="shopping-box">
+    <h2>🛒 Shopping List</h2>
+
+    <!-- Shopping items are injected here by renderShop() in script.js -->
+    <div id="shopList"></div>
+
+    <!-- Manual add item row -->
+    <div class="add-shop-row">
+      <input type="text" id="shopInput" placeholder="Add an item..." />
+      <button class="btn btn-green" onclick="addShopItem()">+ Add</button>
+    </div>
+
+    <!-- Action buttons -->
+    <div style="margin-top:16px; display:flex; gap:10px; flex-wrap:wrap;">
+      <button class="btn btn-green"  onclick="importFromPlanner()">📅 Import from Planner</button>
+      <button class="btn btn-danger" onclick="clearShop()">🗑 Clear All</button>
+    </div>
+  </div>
+</div>
+<!-- End Shopping Tab -->
+
+
+<!-- =====================================================
+     Link to our JavaScript file
+     (always at the BOTTOM so the HTML loads first)
+     ===================================================== -->
+<script src="script.js"></script>
+
+</body>
+</html>
