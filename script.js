@@ -1,26 +1,5 @@
-// =====================================================
-//  script.js — All the logic for Plan My Plate
-// =====================================================
-//  This file controls WHAT HAPPENS when you interact.
-//  Saving recipes, filtering, planning, shopping list.
-// =====================================================
-
-
-// =====================================================
-//  SECTION A: CONSTANTS
-//  These never change — fixed lists we use everywhere
-// =====================================================
-
 const DAYS  = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 const MEALS = ['Breakfast', 'Lunch', 'Dinner'];
-
-
-// =====================================================
-//  SECTION B: PREDEFINED RECIPES (32 famous dishes)
-//  id is NEGATIVE so they never clash with user recipes
-//  (user recipe IDs are positive — from Date.now())
-// =====================================================
-
 const PREDEFINED = [
 
   // ── 🇮🇳 INDIAN ──────────────────────────────────
@@ -161,84 +140,48 @@ const PREDEFINED = [
     instructions:`1. Combine tomatoes, cucumber, red onion in a bowl.\n2. Add olives.\n3. Place feta block on top (don't crumble).\n4. Drizzle generously with olive oil.\n5. Sprinkle oregano, salt, pepper.\n6. Serve immediately with crusty bread.`},
 ];
 
-
-// =====================================================
-//  SECTION C: USER DATA
-//  Loaded from localStorage — persists across reloads
-// =====================================================
-
-// Load saved user recipes (or empty array if none saved yet)
 let recipes   = JSON.parse(localStorage.getItem('recipes')   || '[]');
 
-// Load saved shopping list (or empty array)
 let shopItems = JSON.parse(localStorage.getItem('shopItems') || '[]');
 
-// Track which cuisine filter is currently active
 let activeFilter = 'all';
 
-
-// =====================================================
-//  SECTION D: HELPER — get all recipes combined
-// =====================================================
-
-// Returns predefined + user recipes together as one array
 function getAllRecipes() {
   return [...PREDEFINED, ...recipes];
 }
 
-
-// =====================================================
-//  SECTION E: TABS
-// =====================================================
-
-// Called when user clicks a tab button
-// 'tab' is the id of the section to show ('recipes', 'planner', 'shopping')
 function showTab(tab) {
-  // Hide ALL sections
+ 
   document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-  // Remove 'active' from ALL tab buttons
+ 
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-
-  // Show the selected section
   document.getElementById(tab).classList.add('active');
-  // Highlight the clicked button (event.target = the button that was clicked)
+ 
   event.target.classList.add('active');
 
-  // Rebuild the planner grid whenever we switch to it
+ 
   if (tab === 'planner') buildPlanner();
 }
 
 
-// =====================================================
-//  SECTION F: RECIPE FILTER
-// =====================================================
-
-// Called when a cuisine filter button is clicked
 function setFilter(filter, btn) {
   activeFilter = filter;
-  // Remove active style from all filter buttons
+
   document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-  // Add active style to clicked button
+ 
   btn.classList.add('active');
-  // Re-render cards with new filter
+  
   renderRecipes();
 }
 
-
-// =====================================================
-//  SECTION G: ADD & DELETE USER RECIPES
-// =====================================================
-
 function addRecipe() {
-  // Read what the user typed in the form
+ 
   const name = document.getElementById('rName').value.trim();
   if (!name) { alert('Please enter a recipe name!'); return; }
-
-  // Build a recipe object from the form fields
   const recipe = {
-    id:           Date.now(),   // unique ID using current timestamp
+    id:           Date.now(),   
     name:         name,
-    cuisine:      'My Recipes', // user recipes go under this cuisine
+    cuisine:      'My Recipes', 
     category:     document.getElementById('rCategory').value,
     type:         document.getElementById('rType').value,
     ingredients:  document.getElementById('rIngredients').value,
@@ -248,11 +191,10 @@ function addRecipe() {
     emoji: ['🍛','🥘','🍝','🥗','🍜','🍲','🥙','🍱','🫕','🥞'][Math.floor(Math.random() * 10)]
   };
 
-  recipes.push(recipe);  // add to array
-  save();                // save to localStorage
-  renderRecipes();       // refresh cards on screen
+  recipes.push(recipe);  
+  save();               
+  renderRecipes();       
 
-  // Clear the form fields after saving
   ['rName', 'rIngredients', 'rInstructions', 'rTime'].forEach(id => {
     document.getElementById(id).value = '';
   });
@@ -261,29 +203,22 @@ function addRecipe() {
 }
 
 function deleteRecipe(id) {
-  // Only user recipes (positive IDs) can be deleted
   if (id < 0) { alert('Predefined recipes cannot be deleted.'); return; }
   recipes = recipes.filter(r => r.id !== id); // remove matching recipe
   save();
   renderRecipes();
 }
 
-
-// =====================================================
-//  SECTION H: RENDER RECIPE CARDS
-// =====================================================
-
 function renderRecipes() {
   const grid   = document.getElementById('recipeGrid');
   const search = document.getElementById('searchBox').value.toLowerCase();
   let list     = getAllRecipes();
 
-  // 1. Filter by cuisine
   if (activeFilter !== 'all') {
     list = list.filter(r => r.cuisine === activeFilter);
   }
 
-  // 2. Filter by search text (matches name OR ingredients)
+
   if (search) {
     list = list.filter(r =>
       r.name.toLowerCase().includes(search) ||
@@ -291,15 +226,13 @@ function renderRecipes() {
     );
   }
 
-  // If nothing found, show empty message
+  
   if (list.length === 0) {
     grid.innerHTML = `<div class="empty" style="grid-column:1/-1">
       <span>🔍</span> No recipes found. Try a different search or filter.
     </div>`;
     return;
   }
-
-  // Build HTML for each recipe card using .map() + template literals
   grid.innerHTML = list.map(r => `
     <div class="recipe-card">
       <span class="emoji">${r.emoji}</span>
@@ -326,51 +259,41 @@ function renderRecipes() {
 }
 
 
-// =====================================================
-//  SECTION I: WEEK PLANNER
-//  Plan is stored as: { "MonBreakfast": [id1, id2], ... }
-//  Each slot stores an ARRAY of recipe IDs (multi-dish!)
-// =====================================================
-
-// Get list of recipe IDs for a specific day+meal slot
 function getPlanIds(day, meal) {
   const plan = JSON.parse(localStorage.getItem('plan') || '{}');
   const val  = plan[day + meal];
   if (!val) return [];
-  return Array.isArray(val) ? val : [val]; // handle old single-value format
-}
+  return Array.isArray(val) ? val : [val];
 
-// Save list of recipe IDs for a specific day+meal slot
 function savePlanIds(day, meal, ids) {
   const plan     = JSON.parse(localStorage.getItem('plan') || '{}');
   plan[day + meal] = ids;
   localStorage.setItem('plan', JSON.stringify(plan));
 }
 
-// Called when user picks a dish from a dropdown
+
 function addDishToSlot(day, meal, selectEl) {
   const id  = Number(selectEl.value);
-  if (!id) return;                         // ignore "＋ Add dish..." option
-
+  if (!id) return;                         
   const ids = getPlanIds(day, meal);
-  if (!ids.includes(id)) {                 // don't add duplicates
+  if (!ids.includes(id)) {               
     ids.push(id);
     savePlanIds(day, meal, ids);
   }
 
-  selectEl.value = '';                     // reset dropdown back to placeholder
-  refreshSlot(day, meal);                  // update the tags display
+  selectEl.value = '';                    
+  refreshSlot(day, meal);                  
 }
 
-// Called when user clicks ✕ on a dish tag
+
 function removeDishFromSlot(day, meal, id) {
   let ids = getPlanIds(day, meal);
-  ids     = ids.filter(i => i !== id);    // remove this id
+  ids     = ids.filter(i => i !== id);   
   savePlanIds(day, meal, ids);
   refreshSlot(day, meal);
 }
 
-// Re-render just the tags in one slot (faster than rebuilding whole planner)
+
 function refreshSlot(day, meal) {
   const all    = getAllRecipes();
   const ids    = getPlanIds(day, meal);
@@ -387,7 +310,7 @@ function refreshSlot(day, meal) {
   }).join('');
 }
 
-// Build the full 7-day planner grid
+
 function buildPlanner() {
   const grid = document.getElementById('plannerGrid');
   const all  = getAllRecipes();
@@ -396,7 +319,7 @@ function buildPlanner() {
     <div class="day-col">
       <h3>${day}</h3>
       ${MEALS.map(meal => {
-        // Build existing tag chips for this slot
+      
         const ids      = getPlanIds(day, meal);
         const tagsHtml = ids.map(id => {
           const r = all.find(x => x.id === id);
@@ -422,23 +345,19 @@ function buildPlanner() {
 }
 
 
-// =====================================================
-//  SECTION J: SHOPPING LIST
-// =====================================================
 
-// Add a new item to the shopping list
 function addShopItem(text) {
   const input = document.getElementById('shopInput');
-  const value = text || input.value.trim(); // use passed text OR input box value
+  const value = text || input.value.trim(); 
   if (!value) return;
 
   shopItems.push({ id: Date.now(), text: value, done: false });
   save();
   renderShop();
-  input.value = ''; // clear input box
+  input.value = ''; 
 }
 
-// Toggle an item as done/not done
+
 function toggleShop(id) {
   shopItems = shopItems.map(item =>
     item.id === id ? { ...item, done: !item.done } : item
@@ -447,14 +366,14 @@ function toggleShop(id) {
   renderShop();
 }
 
-// Delete one item
+
 function deleteShopItem(id) {
   shopItems = shopItems.filter(item => item.id !== id);
   save();
   renderShop();
 }
 
-// Clear all items
+
 function clearShop() {
   if (confirm('Clear all shopping items?')) {
     shopItems = [];
@@ -463,11 +382,11 @@ function clearShop() {
   }
 }
 
-// Pull ALL ingredients from this week's planned recipes
+
 function importFromPlanner() {
   const plan = JSON.parse(localStorage.getItem('plan') || '{}');
 
-  // Flatten all plan values into a unique list of IDs
+  
   const usedIds = [...new Set(
     Object.values(plan).flat().filter(v => v).map(Number)
   )];
@@ -480,7 +399,7 @@ function importFromPlanner() {
     if (!r.ingredients) return;
     r.ingredients.split('\n').forEach(line => {
       line = line.trim();
-      // Only add if not already in the list
+    
       if (line && !shopItems.find(i => i.text === line)) {
         shopItems.push({ id: Date.now() + Math.random(), text: line, done: false });
         added++;
@@ -493,7 +412,7 @@ function importFromPlanner() {
   alert(added > 0 ? `✅ Added ${added} ingredients from your planner!` : 'Nothing new to import.');
 }
 
-// Render the shopping list on screen
+
 function renderShop() {
   const list = document.getElementById('shopList');
 
@@ -511,16 +430,13 @@ function renderShop() {
   `).join('');
 }
 
-// Allow pressing Enter in the shopping input to add item
+
 document.getElementById('shopInput').addEventListener('keydown', function(e) {
   if (e.key === 'Enter') addShopItem();
 });
 
 
-// =====================================================
-//  SECTION K: SAVE TO LOCALSTORAGE
-//  Called after every change to persist data
-// =====================================================
+
 
 function save() {
   localStorage.setItem('recipes',   JSON.stringify(recipes));
