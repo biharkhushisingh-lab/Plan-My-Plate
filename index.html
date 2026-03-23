@@ -13,13 +13,9 @@
 </head>
 <body>
 
-<!-- =====================================================
-     HEADER — Logo + App Name
-     ===================================================== -->
 <header>
   <div style="display:flex; align-items:center; justify-content:center; gap:14px; flex-wrap:wrap;">
-
-    <!-- SVG Logo: plate + fork + knife drawn in code (no image file needed!) -->
+<!-- svg logo -->
     <svg width="72" height="72" viewBox="0 0 72 72" xmlns="http://www.w3.org/2000/svg">
 
       <!-- Plate shadow (soft ellipse behind plate) -->
@@ -63,10 +59,6 @@
 </header>
 
 
-<!-- =====================================================
-     TABS — 3 navigation buttons
-     Clicking each button calls showTab() in script.js
-     ===================================================== -->
 <div class="tabs">
   <button class="tab-btn active" onclick="showTab('recipes')">📖 Recipes</button>
   <button class="tab-btn" onclick="showTab('planner')">📅 Week Planner</button>
@@ -74,9 +66,7 @@
 </div>
 
 
-<!-- =====================================================
-     TAB 1: RECIPES
-     ===================================================== -->
+
 <div id="recipes" class="section active">
 
   <!-- Add Recipe Form -->
@@ -141,10 +131,6 @@
 <!-- End Recipes Tab -->
 
 
-<!-- =====================================================
-     TAB 2: WEEK PLANNER
-     The 7-day grid is built by buildPlanner() in script.js
-     ===================================================== -->
 <div id="planner" class="section">
   <div style="text-align:center; margin-bottom:20px;">
     <p style="color:var(--muted); font-size:0.9rem;">Assign your saved recipes to each day & meal 🗓</p>
@@ -152,12 +138,7 @@
   <!-- Grid columns (Mon–Sun) injected here by buildPlanner() -->
   <div class="planner-grid" id="plannerGrid"></div>
 </div>
-<!-- End Planner Tab -->
 
-
-<!-- =====================================================
-     TAB 3: SHOPPING LIST
-     ===================================================== -->
 <div id="shopping" class="section">
   <div class="shopping-box">
     <h2>🛒 Shopping List</h2>
@@ -178,13 +159,7 @@
     </div>
   </div>
 </div>
-<!-- End Shopping Tab -->
 
-
-<!-- =====================================================
-     Link to our JavaScript file
-     (always at the BOTTOM so the HTML loads first)
-     ===================================================== -->
 <script src="script.js"></script>
 
 </body>
